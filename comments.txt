@@ -1,0 +1,1 @@
+o hash do jwt foi gerado duas vezes a partir da frase original, sha256
