@@ -3,7 +3,7 @@ const { notNull } = require('../uteis');
 
 async function setClient(dataClient) {
     const verify = notNull(dataClient);
-    if (verify == undefined) {
+    if (verify) {
         const resInsertClient = await insertClient(dataClient);
         return resInsertClient;
     } else {

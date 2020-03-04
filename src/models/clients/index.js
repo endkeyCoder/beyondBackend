@@ -6,6 +6,12 @@ const Client = connection.define('client', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    age: {
+        type: Sequelize.STRING,
+    },
+    civilState: {
+        type: Sequelize.STRING,
+    },
     address: {
         type: Sequelize.STRING,
         allowNull: false

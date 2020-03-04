@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { setUser, getAllUsers, putUser, delUserbyId } = require('./controllers/user');
+const { setUser, getAllUsers, putUser, delUserbyId, signin } = require('./controllers/user');
 const { setClient, getClient, putClient, delClient } = require('./controllers/client');
 const { authUser, providerToken } = require('./middlewares/authenticate');
 
@@ -12,9 +12,12 @@ routes.get('/', async (req, res) => {
 //rotas relacionadas a usuarios --------------------------------------
 routes.post('/setUser', providerToken, async (req, res) => {
     let resSetUser = await setUser(req.body);
-    resSetUser.dataValues.token = req.token;
-    console.log('print de resSetUser na rota setUser', resSetUser)
-    res.send(resSetUser);
+    if (!('id' in resSetUser)) {
+        res.send(resSetUser);
+    } else {
+        resSetUser.dataValues.token = req.token;
+        res.send(resSetUser);
+    }
 })
 
 routes.get('/getAllUsers', async (req, res) => {
@@ -28,6 +31,16 @@ routes.put('/putUser', authUser, async (req, res) => {
         res.send({ message: 'usuario atualizado com sucesso' })
     } else {
         res.send(resPutUser)
+    }
+})
+
+routes.post('/signin', providerToken, async (req, res) => {
+    const resSignin = await signin(req.body)
+    if(!('id' in resSignin)){
+        res.send(resSignin)
+    }else{
+        resSignin.dataValues.token = req.token;
+        res.send(resSignin)
     }
 })
 

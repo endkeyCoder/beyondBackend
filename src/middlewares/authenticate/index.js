@@ -17,8 +17,8 @@ function authUser(req, res, next) {
 }
 
 async function providerToken(req, res, next) {
-    const { id } = req.body
-    const token = jwt.sign({ id }, process.env.JWT_KEY)
+    const { user, password } = req.body
+    const token = jwt.sign({ user, password }, process.env.JWT_KEY)
     req.token = token;
     next();
 }

@@ -1,15 +1,9 @@
-const { insertUser, selectAllUser, updateUser, deleteUserbyId } = require('../../models/user');
-
-async function notNull(data) {
-    let valuesData = Object.values(data);
-    let verify = await valuesData.find(info => info == "");
-
-    return verify;
-}
+const { insertUser, selectAllUser, updateUser, deleteUserbyId, login } = require('../../models/user');
+const { notNull } = require('../uteis');
 
 async function setUser(dataUser) {
     let verify = await notNull(dataUser);
-    if (verify == undefined) {
+    if (verify) {
         const resInsertUser = await insertUser(dataUser);
         return resInsertUser;
     } else {
@@ -27,16 +21,35 @@ async function putUser(dataUser) {
     return resUpdateUser;
 }
 
+
 async function delUserbyId(idUser) {
     const resDeleteUserByID = await deleteUserbyId(idUser);
     return resDeleteUserByID;
 }
 
-
+async function signin(dataAuth) {
+    if (dataAuth) {
+        let resLogin = await login(dataAuth)
+        if (resLogin == null) {
+            resLogin = {
+                message: 'usuário ou senha incorretos',
+                authenticate: false
+            }
+        } else {
+            console.log('print de resLogin', resLogin)
+            resLogin.dataValues.authenticate = true
+        }
+        console.log('print de resLogin', resLogin)
+        return resLogin;
+    } else {
+        return { message: 'informações para autenticação não informadas' }
+    }
+}
 
 module.exports = {
     setUser,
     getAllUsers,
     putUser,
-    delUserbyId
+    delUserbyId,
+    signin
 }

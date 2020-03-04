@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const { connection } = require('../config');
-
+const Op = Sequelize.Op
 
 const User = connection.define('user', {
     user: {
@@ -20,6 +20,10 @@ const User = connection.define('user', {
         allowNull: false
     },
     group: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
         type: Sequelize.STRING,
         allowNull: false
     }
@@ -69,6 +73,22 @@ async function updateUser(dataUser) {
     }
 }
 
+async function login(dataAuth) {
+    try {
+        const tableUser = await User.sync();
+        return User.findOne({
+            where: {
+                [Op.and]: [
+                    { user: dataAuth.user },
+                    { password: dataAuth.password }
+                ]
+            }
+        })
+    } catch (error) {
+        return { message: 'problema ao tentar realizar login', error }
+    }
+}
+
 
 
 module.exports = {
@@ -76,5 +96,6 @@ module.exports = {
     insertUser,
     selectAllUser,
     deleteUserbyId,
-    updateUser
+    updateUser,
+    login
 }
