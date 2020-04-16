@@ -1,15 +1,18 @@
 const jwt = require('jsonwebtoken');
+const { authUser } = require('../../controllers/user');
 require('dotenv/config');
 
-function authUser(req, res, next) {
+async function middlewareAuthUser(req, res, next) {
     const token = req.headers['x-access-token'];
     if (!token) {
-        return res.status(401).send({ auth: false, message: 'No token provider' })
+        const resAuthUser = await authUser(req.body);
+        if(resAuthUser){
+            
+        }
     }
 
     jwt.verify(token, process.env.JWT_KEY, function (err, decoded) {
         if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-
         // se tudo estiver ok, salva no request para uso posterior
         req.userId = decoded.id;
         next();
@@ -17,13 +20,18 @@ function authUser(req, res, next) {
 }
 
 async function providerToken(req, res, next) {
-    const { user, password } = req.body
-    const token = jwt.sign({ user, password }, process.env.JWT_KEY)
+    const { nick, password, name, email, groupId } = req.body
+    const token = jwt.sign({ nick, password, name, email, groupId }, process.env.JWT_KEY)
     req.token = token;
     next();
 }
 
+function middlewareTeste(req, res, next) {
+    res.send({ message: 'middleware nao deixa cadastrar hahaha' })
+}
+
 module.exports = {
-    authUser,
-    providerToken
+    middlewareAuthUser,
+    providerToken,
+    middlewareTeste
 }

@@ -1,1 +1,6 @@
-o hash do jwt foi gerado duas vezes a partir da frase original, sha256
+o hash do jwt foi gerado uma vez a partir da frase original, sha256
+
+na pasta src/config deve ser criado um arquivo config.json com as configurações do banco
+foi utilizado o cli do sequelize para criar, então é bem simples
+
+na pasta seeders podem ser criados os seeders para testes no banco de dados
