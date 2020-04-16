@@ -18,7 +18,7 @@ module.exports = {
     "dialect": process.env.DATABASE_TEST_DIALECT,
     "operatorsAliases": false,
     "timezone": "-03:00",
-    "use_env_variable": process.env.DATABASE_URL
+    "use_env_variable": 'DATABASE_URL'
   },
   "production": {
     "username": "root",
@@ -27,6 +27,6 @@ module.exports = {
     "host": "127.0.0.1",
     "dialect": "mysql",
     "operatorsAliases": false,
-    "use_env_variable": process.env.DATABASE_URL
+    "use_env_variable": 'DATABASE_URL'
   }
 }
