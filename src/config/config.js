@@ -17,7 +17,8 @@ module.exports = {
     "host": process.env.DATABASE_TEST_HOST,
     "dialect": process.env.DATABASE_TEST_DIALECT,
     "operatorsAliases": false,
-    "timezone": "-03:00"
+    "timezone": "-03:00",
+    "use_env_variable": process.env.DATABASE_URL
   },
   "production": {
     "username": "root",
