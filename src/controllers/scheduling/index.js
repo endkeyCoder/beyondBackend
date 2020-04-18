@@ -7,6 +7,10 @@ async function setScheduling(dataScheduling) {
     try {
         if ('userId' in dataScheduling) {
             const resInsertSchedule = await ModelSchedulings.create(dataScheduling);
+            const slExternalUser = await ModelUsers.findOne({
+                where: { id: resInsertSchedule.dataValues.externalUser }
+            })
+            resInsertSchedule.dataValues.externalUserName = slExternalUser.name;
             return { message: allOk('Agendamento cadastrado com sucesso'), data: resInsertSchedule };
         } else {
             return { message: notFound('Nenhum usuário logado, realize logine tente novamente'), data: dataScheduling }
