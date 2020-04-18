@@ -21,7 +21,16 @@ module.exports = (sequelize, DataTypes) => {
     externalUser: DataTypes.INTEGER
   }, {});
   Schedulings.associate = function(models) {
-    // associations can be defined here
+    Schedulings.hasMany(models.Users, {
+      as: 'user',
+      foreignKey: 'id',
+      sourceKey: 'userId'
+    })
+    Schedulings.hasMany(models.Users, {
+      as: 'externalUserId',
+      foreignKey: 'id',
+      sourceKey: 'externalUser'
+    })
   };
   return Schedulings;
 };

@@ -78,7 +78,7 @@ const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
 const { setUser, login, getExternalUsers } = require('./controllers/user');
 const { getAllEntities } = require('./controllers/entities')
-const { setScheduling, getSchedulings } = require('./controllers/scheduling');
+const { setScheduling, getSchedulings, getSchedulingsByUser } = require('./controllers/scheduling');
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
 
 const routes = Router();
@@ -129,6 +129,10 @@ routes.post('/setScheduling', async (req, res) => {
 routes.get('/getSchedulings', async (req, res) => {
     const resGetSchedulings = await getSchedulings(req.body);
     res.send(resGetSchedulings);
+})
+routes.get('/getSchedulingsByUser/:id', async (req, res) => {
+    const resGetSchedulingsByUser = await getSchedulingsByUser(req.params.id)
+    res.send(resGetSchedulingsByUser);
 })
 //-------------------------------------------------------------------
 //rotas relacionadas as permissões-----------------------------------
