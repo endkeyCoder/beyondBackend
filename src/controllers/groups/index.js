@@ -107,7 +107,7 @@ async function setUserGroup(dataUserGroup) {
         }
     } catch (error) {
         console.log('print de erro em setUserGroup => ', error)
-        return { message: 'Problema ao cadastrar grupo de usuário' }
+        return { message: 'Problema ao cadastrar grupo de usuário', error }
     }
 }
 

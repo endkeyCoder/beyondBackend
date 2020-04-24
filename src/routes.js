@@ -80,6 +80,8 @@ const { setUser, login, getExternalUsers } = require('./controllers/user');
 const { getAllEntities } = require('./controllers/entities')
 const { setScheduling, getSchedulings, getSchedulingsByUser } = require('./controllers/scheduling');
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
+const { setFormPayments, getAllFormPayments } = require('./controllers/formPayments');
+const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayments');
 
 const routes = Router();
 //rotas relacionadas a grupos de usuarios----------------------------
@@ -147,6 +149,27 @@ routes.get('/getAllPermissions', async (req, res) => {
 routes.get('/getPermissionsById/:id', async (req, res) => {
     const resGetPermissionsById = await getPermissionsById(req.params.id)
     res.send(resGetPermissionsById);
+})
+//-------------------------------------------------------------------
+//rotas relacionadas as formas de pagamento--------------------------
+routes.post('/setformPayments', async (req, res) => {
+    const resSetFormPayments = await setFormPayments(req.body);
+    res.send(resSetFormPayments)
+})
+routes.get('/getAllFormPayments', async (req, res) => {
+    const resGetAllFormPayments = await getAllFormPayments();
+    res.send(resGetAllFormPayments)
+})
+//-------------------------------------------------------------------
+//rotas relacionadas aos planos de pagamento-------------------------
+routes.post('/setPlanPayments', async (req, res) => {
+    
+    const resSetPlanPayments = await setPlanPayments(req.body);
+    res.send(resSetPlanPayments)
+})
+routes.get('/getAllPlanPayments', async(req, res) => {
+    const resGetAllPlanPayments = await getAllPlanPayments();
+    res.send(resGetAllPlanPayments)
 })
 //-------------------------------------------------------------------
 module.exports = routes;

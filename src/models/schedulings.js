@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     referencePoint: DataTypes.STRING,
     linkMaps: DataTypes.STRING,
     observation: DataTypes.STRING,
+    status: DataTypes.STRING,
     userId: DataTypes.INTEGER,
     externalUser: DataTypes.INTEGER
   }, {});

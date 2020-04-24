@@ -84,7 +84,6 @@ async function setPermissionsDefault(options = { allPermissions: false }, groupI
                 if (slPermission == null) {
                     const crPermission = await ModelPermissions.create({ groupId: groupId, add: allPermissions, read: allPermissions, update: allPermissions, delete: allPermissions, entityId: entity.id })
                     crPermission.dataValues.entity = [entity];
-                    console.log('print de crPermission em permissionDefault => ', crPermission)
                     return crPermission;
                 }
             })
@@ -92,15 +91,15 @@ async function setPermissionsDefault(options = { allPermissions: false }, groupI
         } else if (entityId) {
             const slGroups = await ModelGroups.findAll();
             const resModelPermission = slGroups.map(async userGroup => {
-                const slPermission = await ModelPermissions.findOne({
-                    where: { groupId: userGroup.id, entityId: entityId },
-                })
+                const slPermission = await ModelPermissions.findOne({ where: { groupId: userGroup.id, entityId: entityId } })
                 if (slPermission == null) {
-                    const crPermission = await ModelPermissions.create({ groupId: groupId, add: allPermissions, read: allPermissions, update: allPermissions, delete: allPermissions, entityId: entity.id })
+                    const crPermission = await ModelPermissions.create({ groupId: userGroup.id, add: allPermissions, read: allPermissions, update: allPermissions, delete: allPermissions, entityId: entityId })
                     return crPermission;
                 }
             })
             return await Promise.all(resModelPermission)
+        } else {
+            return { message: allBad('Nenhuma opção válida informada'), data: { groupId, entityId } }
         }
     } catch (error) {
         console.log('print de erro em permissions => ', error)

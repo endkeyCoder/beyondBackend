@@ -22,6 +22,14 @@ const dataEntities = [
     {
         name: 'audit',
         auxiliaryName: 'Auditoria'
+    },
+    {
+        name: 'schedule',
+        auxiliaryName: 'Agenda'
+    },
+    {
+        name: 'generalSettings',
+        auxiliaryName: 'Configurações Gerais'
     }
 ]
 
@@ -35,7 +43,7 @@ async function insertEntities() {
             if (slEntities == null) {
                 const crEntities = await modelEntities.create(entity);
                 const crPermissions = await setPermissionsDefault({ allPermissions: false }, null, crEntities.dataValues.id);
-                return crEntities
+                return crEntities;
             }
         })
         const resultInsertEntities = await Promise.all(resInsertEntities)
