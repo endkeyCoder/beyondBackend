@@ -2,6 +2,7 @@ const models = require('../../models')
 const ModelSchedulings = models.Schedulings;
 const ModelUsers = models.Users;
 const { allOk, allBad, serviceError, notFound } = require('../../messages');
+const { Op } = require('sequelize');
 
 async function setScheduling(dataScheduling) {
     try {
@@ -83,9 +84,35 @@ async function putSchedulingById(dataScheduling = null) {
     }
 }
 
+async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null, idExternalUser = null }) {
+    try {
+        if (initialDate !== null && finalDate !== null && idExternalUser !== null) {
+            const slSchedulings = await ModelSchedulings.findAll({
+                where: {
+                    dateScheduling: {
+                        [Op.between]: [initialDate, finalDate]
+                    },
+                    externalUser: idExternalUser
+                }
+            })
+            if (slSchedulings.length <= 0) {
+                return { message: allOk('Nenhum agendamento encontrado'), data: slSchedulings }
+            } else {
+                return { message: allOk('Agendamentos selecionados com sucesso'), data: slSchedulings }
+            }
+        } else {
+            return { message: allBad('Filtro inválido para selecionar agendamentos'), data: { initialDate, finalDate } }
+        }
+    } catch (error) {
+        console.log('print de error em getSchedulingsbyDateRange => ', error)
+        return { message: serviceError('Problema para selecionar os agendamentos por data'), error }
+    }
+}
+
 module.exports = {
     setScheduling,
     getSchedulings,
     getSchedulingsByUser,
-    putSchedulingById
+    putSchedulingById,
+    getSchedulingsbyDateRange
 }

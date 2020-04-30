@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Schedulings = sequelize.define('Schedulings', {
     saleProbability: DataTypes.INTEGER,
-    dateScheduling: DataTypes.DATE,
+    dateScheduling: DataTypes.DATEONLY,
     hourScheduling: DataTypes.TIME,
     city: DataTypes.STRING,
     client: DataTypes.STRING,
