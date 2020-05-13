@@ -82,6 +82,7 @@ const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDat
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
 const { setFormPayments, getAllFormPayments } = require('./controllers/formPayments');
 const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayments');
+const { setSale, getSaleByIdScheduling } = require('./controllers/sales');
 
 const routes = Router();
 //rotas relacionadas a grupos de usuarios----------------------------
@@ -174,6 +175,16 @@ routes.post('/setPlanPayments', async (req, res) => {
 routes.get('/getAllPlanPayments', async (req, res) => {
     const resGetAllPlanPayments = await getAllPlanPayments();
     res.send(resGetAllPlanPayments)
+})
+//-------------------------------------------------------------------
+// rotas relacionadas as vendas
+routes.post('/setSale', async (req, res) => {
+    const resSetSale = await setSale(req.body);
+    res.send(resSetSale)
+})
+routes.get('/getSaleByIdScheduling/:id', async (req, res) => {
+    const resGetSaleByIdScheduling = await getSaleByIdScheduling(req.params.id)
+    res.send(resGetSaleByIdScheduling)
 })
 //-------------------------------------------------------------------
 module.exports = routes;

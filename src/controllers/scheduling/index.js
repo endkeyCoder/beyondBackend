@@ -1,6 +1,7 @@
 const models = require('../../models')
 const ModelSchedulings = models.Schedulings;
 const ModelUsers = models.Users;
+const ModelSales = models.Sales;
 const { allOk, allBad, serviceError, notFound } = require('../../messages');
 const { Op } = require('sequelize');
 
@@ -93,7 +94,7 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
                         [Op.between]: [initialDate, finalDate]
                     },
                     externalUser: idExternalUser
-                }
+                },
             })
             if (slSchedulings.length <= 0) {
                 return { message: allOk('Nenhum agendamento encontrado'), data: slSchedulings }

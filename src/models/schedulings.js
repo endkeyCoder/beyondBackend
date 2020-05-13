@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'id',
       sourceKey: 'externalUser'
     })
+   
   };
   return Schedulings;
 };

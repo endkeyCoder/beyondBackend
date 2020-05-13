@@ -6,7 +6,7 @@ module.exports = {
     return queryInterface.addColumn('Schedulings', 'status', {
       type: Sequelize.STRING,
       after: 'observation',
-      defaultValue: 'Agendado'
+      defaultValue: 'pendente'
     })
   },
 
