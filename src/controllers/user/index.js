@@ -126,9 +126,21 @@ async function getExternalUsers() {
         return { message: serviceError('Problema ao tentar selecionar usuários externos'), error }
     }
 }
+async function getAllUsers() {
+    try {
+        const slUsers = await ModelUsers.findAll({
+            attributes: { exclude: ['password'] }
+        })
+        return { message: allOk('Usuários selecionados com sucesso'), data: slUsers }
+    } catch (error) {
+        console.log('print de error em getAllUsers => ', error);
+        return { message: serviceError('Problema ao tentar selecionar usuários'), error }
+    }
+}
 
 module.exports = {
     setUser,
     login,
-    getExternalUsers
+    getExternalUsers,
+    getAllUsers
 }

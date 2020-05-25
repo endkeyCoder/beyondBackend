@@ -76,13 +76,14 @@ routes.put('/putGroup', async (req, res) => {
 */
 const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
-const { setUser, login, getExternalUsers } = require('./controllers/user');
+const { setUser, login, getExternalUsers, getAllUsers } = require('./controllers/user');
 const { getAllEntities } = require('./controllers/entities')
 const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDateRange } = require('./controllers/scheduling');
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
 const { setFormPayments, getAllFormPayments } = require('./controllers/formPayments');
 const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayments');
 const { setSale, getSaleByIdScheduling } = require('./controllers/sales');
+const { getAuditResume } = require('./controllers/audit');
 
 const routes = Router();
 //rotas relacionadas a grupos de usuarios----------------------------
@@ -105,7 +106,6 @@ routes.put('/putUsergroup', async (req, res) => {
 //-------------------------------------------------------------------
 //rotas relacionadas a usuarios --------------------------------------
 routes.post('/setUser', async (req, res) => {
-    console.log('print em putUser => ', req)
     const resSetUser = await setUser(req.body);
     res.send(resSetUser);
 })
@@ -116,6 +116,10 @@ routes.post('/login', async (req, res) => {
 routes.get('/getExternalUsers', async (req, res) => {
     const resGetExternalUsers = await getExternalUsers();
     res.send(resGetExternalUsers)
+})
+routes.get('/getAllUsers', async (req, res) => {
+    const resGetAllUsers = await getAllUsers();
+    res.send(resGetAllUsers)
 })
 //-------------------------------------------------------------------
 //rotas relacionadas a entidades
@@ -185,6 +189,14 @@ routes.post('/setSale', async (req, res) => {
 routes.get('/getSaleByIdScheduling/:id', async (req, res) => {
     const resGetSaleByIdScheduling = await getSaleByIdScheduling(req.params.id)
     res.send(resGetSaleByIdScheduling)
+})
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//Rotas relacionadas a auditoria
+routes.get('/getAuditResume', async (req, res) => {
+    console.log('print de req.query em getAuditResume', req.query)
+    const resGetAuditResume = await getAuditResume(req.query)
+    res.send(resGetAuditResume)
 })
 //-------------------------------------------------------------------
 module.exports = routes;

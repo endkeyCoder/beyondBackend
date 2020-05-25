@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     externalUser: DataTypes.INTEGER
   }, {});
-  Schedulings.associate = function(models) {
+  Schedulings.associate = function (models) {
     Schedulings.hasMany(models.Users, {
       as: 'user',
       foreignKey: 'id',
@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'id',
       sourceKey: 'externalUser'
     })
-   
+
   };
   return Schedulings;
 };

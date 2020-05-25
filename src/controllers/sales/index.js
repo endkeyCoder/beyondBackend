@@ -98,6 +98,7 @@ async function getSaleByIdScheduling(idScheduling) {
     }
 }
 
+
 module.exports = {
     setSale,
     getSaleByIdScheduling
