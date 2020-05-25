@@ -73,18 +73,21 @@ async function justDate(initialDate, finalDate) {
             model: ModelSchdulings,
             as: 'scheduling',
             required: true,
-            where: { status: 'vendido' }
-        },
-        where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
+            where: { status: 'vendido', dateScheduling: {
+                [Op.between]: [initialDate, finalDate]
+            } }
+        }
     });
     let totSales = await ModelSales.count({
+        attributes: ['id'],
         include: {
             model: ModelSchdulings,
             as: 'scheduling',
             required: true,
-            where: { status: 'vendido' }
+            where: { status: 'vendido', dateScheduling: {
+                [Op.between]: [initialDate, finalDate]
+            } }
         },
-        where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
     });
     if (valueSales == null) {
         valueSales = 0
