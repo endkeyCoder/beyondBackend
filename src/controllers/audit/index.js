@@ -147,7 +147,9 @@ async function withGroup(initialDate, finalDate, groupId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido' }
+                    where: { status: 'vendido', dateScheduling: {
+                        [Op.between]: [initialDate, finalDate]
+                    } }
                 },
                 {
                     model: ModelUser,
@@ -156,7 +158,6 @@ async function withGroup(initialDate, finalDate, groupId) {
                     where: { groupId: groupId }
                 }
             ],
-            where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
         });
         let totSales = await ModelSales.count({
             include: [
@@ -164,7 +165,9 @@ async function withGroup(initialDate, finalDate, groupId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido' }
+                    where: { status: 'vendido', dateScheduling: {
+                        [Op.between]: [initialDate, finalDate]
+                    } }
                 },
                 {
                     model: ModelUser,
@@ -172,8 +175,7 @@ async function withGroup(initialDate, finalDate, groupId) {
                     required: true,
                     where: { groupId: groupId }
                 }
-            ],
-            where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
+            ]
         });
         if (valueSales == null) {
             valueSales = 0
@@ -237,7 +239,9 @@ async function withUser(initialDate, finalDate, userId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido' }
+                    where: { status: 'vendido', dateScheduling: {
+                        [Op.between]: [initialDate, finalDate]
+                    } }
                 },
                 {
                     model: ModelUser,
@@ -245,8 +249,7 @@ async function withUser(initialDate, finalDate, userId) {
                     required: true,
                     where: { id: userId }
                 }
-            ],
-            where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
+            ]
         });
         let totSales = await ModelSales.count({
             include: [
@@ -254,7 +257,9 @@ async function withUser(initialDate, finalDate, userId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido' }
+                    where: { status: 'vendido', dateScheduling: {
+                        [Op.between]: [initialDate, finalDate]
+                    } }
                 },
                 {
                     model: ModelUser,
@@ -262,8 +267,7 @@ async function withUser(initialDate, finalDate, userId) {
                     required: true,
                     where: { id: userId }
                 }
-            ],
-            where: { createdAt: { [Op.between]: [initialDate, finalDate] } }
+            ]
         });
         if (valueSales == null) {
             valueSales = 0
