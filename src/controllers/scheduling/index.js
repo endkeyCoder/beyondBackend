@@ -110,10 +110,117 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
     }
 }
 
+async function getSchedulingByIdOrClient({
+    initialDate = '',
+    finalDate = '',
+    userId = 0,
+    all = 'false',
+    idScheduling = 0,
+    client = '',
+    typeDate = 'dateScheduling'
+}) {
+    try {
+        if (initialDate !== "" && finalDate !== "") {
+            let slSchedulings = [];
+            if (all == 'true') {
+                slSchedulings = await ModelSchedulings.findAll({
+                    where: {
+                        [typeDate]: {
+                            [Op.between]: [initialDate, `${finalDate} 23:59:59`]
+                        },
+                        [Op.or]: [
+                            { id: idScheduling },
+                            {
+                                client: {
+                                    [Op.like]: `${client}%`
+                                }
+                            }
+                        ]
+                    },
+                    include: {
+                        model: ModelUsers,
+                        as: 'user',
+                        required: true,
+                        attributes: ['name']
+                    }
+                })
+            } else {
+                slSchedulings = await ModelSchedulings.findAll({
+                    where: {
+                        [typeDate]: {
+                            [Op.between]: [initialDate, `${finalDate} 23:59:59`]
+                        },
+                        userId: userId,
+                        [Op.or]: [
+                            { id: idScheduling },
+                            {
+                                client: {
+                                    [Op.like]: `${client}%`
+                                }
+                            }
+                        ]
+                    },
+                    include: {
+                        model: ModelUsers,
+                        as: 'user',
+                        required: true,
+                        attributes: ['name']
+                    }
+                })
+            }
+            if (slSchedulings.length <= 0) {
+                return { message: allOk('Nenhum agendamento encontrado'), data: slSchedulings }
+            } else {
+                return { message: allOk('Agendamentos selecionados com sucesso'), data: slSchedulings }
+            }
+        } else {
+            return { message: allBad('A data inicial e final devem ser informadas'), data: { initialDate, finalDate } }
+        }
+    } catch (error) {
+        console.log('print de error em getSchedulingByIdOrClient => ', error)
+        return { message: serviceError('Problema ao tentar selecionar agendamentos') }
+    }
+}
+
+async function putScheduling(id = '', data = '') {
+    try {
+        if (id !== '' && data !== '') {
+            const updateScheduling = await ModelSchedulings.update(data, {
+                where: { id }
+            })
+            return { message: allOk('O agendamento foi atualizado com sucesso!'), data: { id, data }, queryResult: updateScheduling }
+        } else {
+            return { message: allBad('Informações insuficientes para realizar a atualização do agendamento'), data: { id, data } }
+        }
+    } catch (error) {
+        return { message: serviceError('Problema ao tentar atualizar o agendamento'), error, data: { id, data } }
+    }
+}
+
+async function delScheduling(id = '') {
+    try {
+        if (id !== '') {
+            const deleteScheduling = await ModelSchedulings.destroy({
+                where: { id }
+            })
+            return { message: allOk('O arquivo foi excluído com sucesso'), queryResult: deleteScheduling, data: { id } }
+        }
+        else {
+            return { message: allBad('Informações insuficientes para realizar a exclusão do agendamento'), data: { id } }
+        }
+    } catch (error) {
+        console.log('print de error em delScheduling => ', error)
+        return { message: serviceError('Problema ao tentar excluir o agendamento'), error, data: { id } }
+    }
+}
+
 module.exports = {
     setScheduling,
     getSchedulings,
     getSchedulingsByUser,
     putSchedulingById,
-    getSchedulingsbyDateRange
+    getSchedulingsbyDateRange,
+    getSchedulingByIdOrClient,
+    putScheduling,
+    delScheduling
 }

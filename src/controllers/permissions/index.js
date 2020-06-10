@@ -151,6 +151,7 @@ async function putPermissions(dataPermissions) {
     try {
         if (dataPermissions.length > 0) {
             const updatePermissions = dataPermissions.map(async permission => {
+                console.log('print de permission => ', permission)
                 permission.entity = undefined;
                 permission.id = undefined;
                 return await ModelPermissions.update(permission, {

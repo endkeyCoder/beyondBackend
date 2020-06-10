@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     observation: DataTypes.STRING,
     status: DataTypes.STRING,
     userId: DataTypes.INTEGER,
-    externalUser: DataTypes.INTEGER
+    externalUser: DataTypes.INTEGER,
   }, {});
   Schedulings.associate = function (models) {
     Schedulings.hasMany(models.Users, {

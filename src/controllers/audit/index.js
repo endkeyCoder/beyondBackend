@@ -1,7 +1,6 @@
 const models = require('../../models');
 const ModelSales = models.Sales;
 const ModelSchdulings = models.Schedulings;
-const ModelUsergroup = models.userGroups;
 const ModelUser = models.Users;
 const { allOk, allBad, serviceError, notFound } = require('../../messages');
 const { Op } = require('sequelize');
@@ -73,9 +72,11 @@ async function justDate(initialDate, finalDate) {
             model: ModelSchdulings,
             as: 'scheduling',
             required: true,
-            where: { status: 'vendido', dateScheduling: {
-                [Op.between]: [initialDate, finalDate]
-            } }
+            where: {
+                status: 'vendido', dateScheduling: {
+                    [Op.between]: [initialDate, finalDate]
+                }
+            }
         }
     });
     let totSales = await ModelSales.count({
@@ -84,9 +85,11 @@ async function justDate(initialDate, finalDate) {
             model: ModelSchdulings,
             as: 'scheduling',
             required: true,
-            where: { status: 'vendido', dateScheduling: {
-                [Op.between]: [initialDate, finalDate]
-            } }
+            where: {
+                status: 'vendido', dateScheduling: {
+                    [Op.between]: [initialDate, finalDate]
+                }
+            }
         },
     });
     if (valueSales == null) {
@@ -147,9 +150,11 @@ async function withGroup(initialDate, finalDate, groupId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido', dateScheduling: {
-                        [Op.between]: [initialDate, finalDate]
-                    } }
+                    where: {
+                        status: 'vendido', dateScheduling: {
+                            [Op.between]: [initialDate, finalDate]
+                        }
+                    }
                 },
                 {
                     model: ModelUser,
@@ -165,9 +170,11 @@ async function withGroup(initialDate, finalDate, groupId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido', dateScheduling: {
-                        [Op.between]: [initialDate, finalDate]
-                    } }
+                    where: {
+                        status: 'vendido', dateScheduling: {
+                            [Op.between]: [initialDate, finalDate]
+                        }
+                    }
                 },
                 {
                     model: ModelUser,
@@ -239,9 +246,11 @@ async function withUser(initialDate, finalDate, userId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido', dateScheduling: {
-                        [Op.between]: [initialDate, finalDate]
-                    } }
+                    where: {
+                        status: 'vendido', dateScheduling: {
+                            [Op.between]: [initialDate, finalDate]
+                        }
+                    }
                 },
                 {
                     model: ModelUser,
@@ -257,9 +266,11 @@ async function withUser(initialDate, finalDate, userId) {
                     model: ModelSchdulings,
                     as: 'scheduling',
                     required: true,
-                    where: { status: 'vendido', dateScheduling: {
-                        [Op.between]: [initialDate, finalDate]
-                    } }
+                    where: {
+                        status: 'vendido', dateScheduling: {
+                            [Op.between]: [initialDate, finalDate]
+                        }
+                    }
                 },
                 {
                     model: ModelUser,
@@ -285,6 +296,14 @@ async function withUser(initialDate, finalDate, userId) {
     } catch (error) {
         console.log('print de error em withGroup => ', error);
         return { message: serviceError('Problema ao tentar selecionar auditoria por usuário'), error }
+    }
+}
+
+async function getAuditDetails({ initialDate = "", finalDate = "", userId = "", groupId = "" }) {
+    try {
+        
+    } catch (error) {
+
     }
 }
 

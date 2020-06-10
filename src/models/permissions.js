@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     read: DataTypes.BOOLEAN,
     update: DataTypes.BOOLEAN,
     delete: DataTypes.BOOLEAN,
+    all: DataTypes.BOOLEAN,
     entityId: DataTypes.INTEGER,
   }, {});
   Permissions.associate = function (models) {

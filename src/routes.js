@@ -76,13 +76,22 @@ routes.put('/putGroup', async (req, res) => {
 */
 const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
+
 const { setUser, login, getExternalUsers, getAllUsers } = require('./controllers/user');
-const { getAllEntities } = require('./controllers/entities')
-const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDateRange } = require('./controllers/scheduling');
+
+const { getAllEntities } = require('./controllers/entities');
+
+const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDateRange,
+    getSchedulingByIdOrClient, putScheduling, delScheduling } = require('./controllers/scheduling');
+
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
+
 const { setFormPayments, getAllFormPayments } = require('./controllers/formPayments');
+
 const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayments');
+
 const { setSale, getSaleByIdScheduling } = require('./controllers/sales');
+
 const { getAuditResume } = require('./controllers/audit');
 
 const routes = Router();
@@ -145,6 +154,18 @@ routes.get('/getSchedulingsbyDateRange', async (req, res) => {
     const resGetSchedulingsbyDateRange = await getSchedulingsbyDateRange(req.query);
     res.send(resGetSchedulingsbyDateRange)
 })
+routes.get('/getSchedulingByIdOrClient', async (req, res) => {
+    const resGetSchedulingByIdOrClient = await getSchedulingByIdOrClient(req.query);
+    res.send(resGetSchedulingByIdOrClient)
+})
+routes.put('/putScheduling/:id', async (req, res) => {
+    const resPutScheduling = await putScheduling(req.params.id, req.body)
+    res.send(resPutScheduling)
+})
+routes.delete('/delScheduling/:id', async (req, res) => {
+    const resDelScheduling = await delScheduling(req.params.id)
+    res.send(resDelScheduling)
+})
 //-------------------------------------------------------------------
 //rotas relacionadas as permissões-----------------------------------
 routes.put('/putPermissions', async (req, res) => {
@@ -194,7 +215,6 @@ routes.get('/getSaleByIdScheduling/:id', async (req, res) => {
 //-------------------------------------------------------------------
 //Rotas relacionadas a auditoria
 routes.get('/getAuditResume', async (req, res) => {
-    console.log('print de req.query em getAuditResume', req.query)
     const resGetAuditResume = await getAuditResume(req.query)
     res.send(resGetAuditResume)
 })

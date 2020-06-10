@@ -111,6 +111,7 @@ async function login(dataUser) {
 async function getExternalUsers() {
     try {
         const slUsers = await ModelUsers.findAll({
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: ModelGroups,
