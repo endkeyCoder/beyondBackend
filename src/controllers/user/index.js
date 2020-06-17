@@ -1,54 +1,3 @@
-/*const { insertUser, selectAllUser, updateUser, deleteUserbyId, selectUserByFilter } = require('../../models/user');
-const { getPermissionsByIdGroup } = require('../permissions');
-const bcrypt = require('bcrypt');
-const { notNull, providerToken } = require('../uteis');
-
-async function setUser(dataUser) {
-    let verify = await notNull(dataUser);
-    if (verify) {
-        //dataUser.password = await bcrypt.hash(dataUser.password, 8);//cria um hash da senha
-        
-        let resInsertUser = await insertUser(dataUser);
-        if (!resInsertUser.error) {
-            console.log('print de resInsertUser => ', resInsertUser);
-            const { nick, name, email, groupId } = resInsertUser.dataValues;
-            resInsertUser.dataValues.token = providerToken({ nick, name, email, groupId });
-            resInsertUser.dataValues.password = undefined; //não retorna a senha após o cadastro
-            resInsertUser.dataValues.statusCode = 200;
-            return resInsertUser;
-        } else {
-            return resInsertUser;
-        }
-
-    } else {
-        return { message: 'Contain invalid fields', statusCode: 400 }
-    }
-}
-
-async function getAllUsers() {
-    const resSelectAllUser = await selectAllUser();
-    return resSelectAllUser;
-}
-
-async function putUser(dataUser) {
-    const resUpdateUser = await updateUser(dataUser);
-    return resUpdateUser;
-}
-
-
-async function delUserbyId(idUser) {
-    const resDeleteUserByID = await deleteUserbyId(idUser);
-    return resDeleteUserByID;
-}
-
-module.exports = {
-    setUser,
-    getAllUsers,
-    putUser,
-    delUserbyId,
-    signin
-}*/
-
 const models = require('../../models');
 const ModelUsers = models.Users;
 const ModelGroups = models.userGroups;
@@ -56,6 +5,9 @@ const { providerToken } = require('../uteis');
 const { getPermissionsById } = require('../permissions');
 const { Op } = require('sequelize');
 const { notFound, serviceError, allOk, allBad } = require('../../messages');
+const apiEmail = require('../../config/axios');
+const crypto = require('crypto');
+const sequelize = models.sequelize;
 
 async function setUser(dataUser) {
     try {
@@ -111,7 +63,7 @@ async function login(dataUser) {
 async function getExternalUsers() {
     try {
         const slUsers = await ModelUsers.findAll({
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: ModelGroups,
@@ -139,9 +91,79 @@ async function getAllUsers() {
     }
 }
 
+async function generateAutoPassword(data) {
+    try {
+        const hash = crypto.createHash('md5').update(data).digest('hex')
+        return hash.slice(0, 10)
+    } catch (error) {
+        return 'Nunca mais vou esquecer minha senha';
+    }
+}
+
+async function forgotPassword({ email }) {
+    try {
+        const newPass = await generateAutoPassword(email);
+        const updatePassword = await ModelUsers.update({ password: newPass }, {
+            where: { email }
+        })
+        if (updatePassword[0] == 1) {
+            const resSendEmail = await apiEmail.post('/sendMail', {
+                transporter: {
+                    host: process.env.MAIL_TRANSPORTER_SMTP,
+                    port: process.env.MAIL_TRANSPORTER_PORT,
+                    secure: Boolean(process.env.MAIL_TRANSPORTER_SECURE),
+                    auth: {
+                        user: process.env.MAIL_TRANSPORTER_USER,
+                        pass: process.env.MAIL_TRANSPORTER_PASSWORD
+                    }
+                },
+                sender: {
+                    from: process.env.MAIL_SENDER_FROM,
+                    to: email,
+                    subject: 'Você esqueceu sua senha!',
+                    text: `Uma nova senha foi cadastrada automaticamente para acessar o sistema, é recomendado realizar a alteração da senha assim que acessar novamente o sistema\n\n Nova senha: ${newPass}`
+                }
+            })
+
+            return { message: allBad('Verificar retorno no envio de email'), data: resSendEmail.data }
+        } else {
+            return { message: notFound('Email não encontrado'), data: email }
+        }
+    } catch (error) {
+        console.log('print de error em forgotPassword => ', error)
+        return { message: serviceError('Problema com a função esqueci a senha'), error }
+    }
+}
+
+async function changePassword(idUser = '', newPassword = '', oldPassword) {
+    try {
+        if (idUser !== '' && newPassword !== '' && oldPassword !== '') {
+            const execChangePassword = await sequelize.transaction(async (t) => {
+                const slLogin = await ModelUsers.findOne({
+                    where: { id: idUser, password: oldPassword }
+                }, { transaction: t })
+                if (slLogin !== null) {
+                    const updatePassword = await ModelUsers.update({ password: newPassword }, {
+                        where: { id: idUser, password: oldPassword }
+                    }, { transaction: t })
+                    return { message: allOk('A senha foi alterada com sucesso'), data: newPassword }
+                } else {
+                    return { message: allBad('A senha atual está incorreta'), data: oldPassword }
+                }
+            })
+            return { data: execChangePassword };
+        }
+    } catch (error) {
+        console.log('print de error em changePassword => ', error)
+        return { message: serviceError('Problema ao tentar alterar a senha'), error }
+    }
+}
+
 module.exports = {
     setUser,
     login,
     getExternalUsers,
-    getAllUsers
+    getAllUsers,
+    forgotPassword,
+    changePassword
 }
