@@ -6,7 +6,7 @@ const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePas
 const { getAllEntities } = require('./controllers/entities');
 
 const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDateRange,
-    getSchedulingByIdOrClient, putScheduling, delScheduling } = require('./controllers/scheduling');
+    getSchedulingsByFilters, putScheduling, delScheduling } = require('./controllers/scheduling');
 
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
 
@@ -87,9 +87,9 @@ routes.get('/getSchedulingsbyDateRange', async (req, res) => {
     const resGetSchedulingsbyDateRange = await getSchedulingsbyDateRange(req.query);
     res.send(resGetSchedulingsbyDateRange)
 })
-routes.get('/getSchedulingByIdOrClient', async (req, res) => {
-    const resGetSchedulingByIdOrClient = await getSchedulingByIdOrClient(req.query);
-    res.send(resGetSchedulingByIdOrClient)
+routes.get('/getSchedulingsByFilters', async (req, res) => {
+    const resGetSchedulingsByFilters = await getSchedulingsByFilters(req.query);
+    res.send(resGetSchedulingsByFilters)
 })
 routes.put('/putScheduling/:id', async (req, res) => {
     const resPutScheduling = await putScheduling(req.params.id, req.body)

@@ -110,7 +110,7 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
     }
 }
 
-async function getSchedulingByIdOrClient({
+async function getSchedulingsByFilters({
     initialDate = '',
     finalDate = '',
     userId = 0,
@@ -177,7 +177,7 @@ async function getSchedulingByIdOrClient({
             return { message: allBad('A data inicial e final devem ser informadas'), data: { initialDate, finalDate } }
         }
     } catch (error) {
-        console.log('print de error em getSchedulingByIdOrClient => ', error)
+        console.log('print de error em getSchedulingsByFilters => ', error)
         return { message: serviceError('Problema ao tentar selecionar agendamentos') }
     }
 }
@@ -220,7 +220,7 @@ module.exports = {
     getSchedulingsByUser,
     putSchedulingById,
     getSchedulingsbyDateRange,
-    getSchedulingByIdOrClient,
+    getSchedulingsByFilters,
     putScheduling,
     delScheduling
 }
