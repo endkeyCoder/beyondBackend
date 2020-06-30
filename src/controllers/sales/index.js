@@ -4,7 +4,10 @@ const ModelFormPayments = models.formPayments;
 const ModelPlanPayments = models.planPayments;
 const ModelSchedulings = models.Schedulings;
 const ModelFormPaymentsSale = models.formPaymentsSale;
+const ModelUser = models.Users;
+const ModelGroups = models.userGroups;
 const sequelize = models.sequelize;
+const { Op } = require('sequelize');
 const { allOk, serviceError, allBad } = require('../../messages');
 
 async function setSale(dataSale) {
@@ -43,6 +46,7 @@ async function setSale(dataSale) {
                         where: { idSale: idSale }
                     }, { transaction: t })
                     const crFormPaymentsSale = formPayments.map(async formPayment => {
+                        formPayment.idSale = idSale;
                         return await ModelFormPaymentsSale.create(formPayment)
                     }, { transaction: t })
                 }
@@ -98,8 +102,154 @@ async function getSaleByIdScheduling(idScheduling) {
     }
 }
 
+async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDate = '', finalDate = '', dateScheduling = 'false',
+    queryAdvanced = {}
+}) {
+    try {
+        let result = [];
+        if (initialDate !== '' && finalDate !== '') {
+            const filterSales = () => {
+                const resultFilter = {}
+                if (dateScheduling == 'false') {
+                    resultFilter.createdAt = { [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`] }
+                }
+                if (idExternalUser !== '') {
+                    resultFilter.userId = idExternalUser
+                }
+                return resultFilter;
+            }
+            const includes = () => {
+                const resultIncludes = [
+                    {
+                        model: ModelSchedulings,
+                        as: 'scheduling',
+                        required: true,
+                        attributes: ['id', 'createdAt', 'dateScheduling']
+                    },
+                    {
+                        model: ModelUser,
+                        as: 'user',
+                        required: true,
+                        attributes: ['id', 'name', 'nick']
+                    },
+                    {
+                        model: ModelPlanPayments,
+                        as: 'planPayment',
+                        required: true,
+                        attributes: ['id', 'title']
+                    },
+                    {
+                        model: ModelFormPaymentsSale,
+                        as: 'formPaymentsId',
+                        required: true,
+                        attributes: ['id', 'value', 'entry'],
+                        include: {
+                            model: ModelFormPayments,
+                            as: 'formPayment',
+                            required: true,
+                            attributes: ['id', 'title', 'rate']
+                        }
+                    }
+                ]
+                if (dateScheduling == 'true') {
+                    resultIncludes.find(myInclude => myInclude.as == 'scheduling').where = {
+                        dateScheduling: {
+                            [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
+                        }
+                    }
+                }
+
+                if (idGroup !== '') {
+                    resultIncludes.find(myInclude => myInclude.as == 'user').include = {
+                        model: ModelGroups,
+                        as: 'userGroup',
+                        required: true,
+                        where: {
+                            id: idGroup
+                        }
+                    }
+                }
+
+                return resultIncludes;
+            }
+            const filterTotSum = () => {
+                const resultTotSum = {}
+                if (dateScheduling == 'false') {
+                    resultTotSum.createdAt = {
+                        [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
+                    }
+                }
+                if (idExternalUser !== '') {
+                    resultTotSum.userId = idExternalUser
+                }
+                return resultTotSum;
+            }
+            const includeTotSum = () => {
+                const resultIncludeTotSum = [];
+                if (dateScheduling == 'true') {
+                    resultIncludeTotSum.push({
+                        model: ModelSchedulings,
+                        as: 'scheduling',
+                        required: true,
+                        where: {
+                            dateScheduling: {
+                                [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
+                            }
+                        }
+                    })
+                }
+                if (idGroup !== '') {
+                    resultIncludeTotSum.push({
+                        model: ModelUser,
+                        as: 'user',
+                        required: true,
+                        include: {
+                            model: ModelGroups,
+                            as: 'userGroup',
+                            required: true,
+                            where: {
+                                id: idGroup
+                            }
+                        }
+                    })
+                }
+                return resultIncludeTotSum
+            }
+            const trSales = await sequelize.transaction(async (t) => {
+                const slSales = await ModelSales.findAll({
+                    where: filterSales(),
+                    include: includes()
+                }, { transaction: t })
+
+                const totSales = await ModelSales.sum('value', {
+                    where: filterTotSum(),
+                    include: includeTotSum()
+                }, { transaction: t })
+                return { sales: slSales, totSales }
+            })
+
+            trSales.sales.forEach(sale => {
+                sale.dataValues.formPaymentsId.forEach((infoForm, index2) => {
+                    const { value } = infoForm.dataValues
+                    const { rate } = infoForm.dataValues.formPayment[0]
+                    sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate = (parseFloat(value) / 100 * parseFloat(rate)).toFixed(2)
+                })
+            })
+            result = trSales
+        } else {
+            result = { message: allBad('Data de inicio e fim não informada!'), data: { initialDate, finalDate } }
+        }
+
+        return { message: allOk('Em andamento'), data: result }
+    } catch (error) {
+        console.log('print de error em getSalesByFilters => ', error)
+        return { message: serviceError('Problema ao tentar selecionar relatorio de vendas') }
+    }
+}
+
 
 module.exports = {
     setSale,
-    getSaleByIdScheduling
+    getSaleByIdScheduling,
+    getSalesByFilters
 }

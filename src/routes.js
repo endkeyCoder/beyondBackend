@@ -14,7 +14,7 @@ const { setFormPayments, getAllFormPayments } = require('./controllers/formPayme
 
 const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayments');
 
-const { setSale, getSaleByIdScheduling } = require('./controllers/sales');
+const { setSale, getSaleByIdScheduling, getSalesByFilters } = require('./controllers/sales');
 
 const { getAuditResume } = require('./controllers/audit');
 
@@ -143,6 +143,10 @@ routes.post('/setSale', async (req, res) => {
 routes.get('/getSaleByIdScheduling/:id', async (req, res) => {
     const resGetSaleByIdScheduling = await getSaleByIdScheduling(req.params.id)
     res.send(resGetSaleByIdScheduling)
+})
+routes.get('/getSalesByFilters', async (req, res) => {
+    const resGetSalesByFilters = await getSalesByFilters(req.query);
+    res.send(resGetSalesByFilters)
 })
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
