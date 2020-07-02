@@ -3,12 +3,18 @@ const ModelSchedulings = models.Schedulings;
 const ModelUsers = models.Users;
 const ModelSales = models.Sales;
 const { allOk, allBad, serviceError, notFound } = require('../../messages');
-const { Op } = require('sequelize');
+const { Op, Model } = require('sequelize');
 const { sequelize } = require('../../models');
 
 async function setScheduling(dataScheduling) {
     try {
         if ('userId' in dataScheduling) {
+            const lastCode = await ModelSchedulings.findOne({
+                order: [
+                    ['id', 'DESC']
+                ]
+            })
+            dataScheduling.cod = parseInt(lastCode.dataValues.cod) + 1
             const resInsertSchedule = await ModelSchedulings.create(dataScheduling);
             const slExternalUser = await ModelUsers.findOne({
                 where: { id: resInsertSchedule.dataValues.externalUser }
@@ -130,7 +136,7 @@ async function getSchedulingsByFilters({
                             [Op.between]: [initialDate, `${finalDate} 23:59:59`]
                         },
                         [Op.or]: [
-                            { id: idScheduling },
+                            { cod: idScheduling },
                             {
                                 client: {
                                     [Op.like]: `${client}%`
@@ -153,7 +159,7 @@ async function getSchedulingsByFilters({
                         },
                         userId: userId,
                         [Op.or]: [
-                            { id: idScheduling },
+                            { cod: idScheduling },
                             {
                                 client: {
                                     [Op.like]: `${client}%`

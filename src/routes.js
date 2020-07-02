@@ -6,7 +6,7 @@ const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePas
 const { getAllEntities } = require('./controllers/entities');
 
 const { setScheduling, getSchedulings, getSchedulingsByUser, getSchedulingsbyDateRange,
-    getSchedulingsByFilters, putScheduling, delScheduling, generateCod } = require('./controllers/scheduling');
+    getSchedulingsByFilters, putScheduling, delScheduling } = require('./controllers/scheduling');
 
 const { putPermissions, getAllPermissions, getPermissionsById } = require('./controllers/permissions');
 
@@ -44,7 +44,6 @@ routes.post('/setUser', async (req, res) => {
 })
 routes.post('/login', async (req, res) => {
     const resSignin = await login(req.body);
-    await generateCod()
     res.send(resSignin);
 })
 routes.get('/getExternalUsers', async (req, res) => {
