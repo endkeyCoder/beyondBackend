@@ -4,6 +4,7 @@ const ModelUsers = models.Users;
 const ModelSales = models.Sales;
 const { allOk, allBad, serviceError, notFound } = require('../../messages');
 const { Op } = require('sequelize');
+const { sequelize } = require('../../models');
 
 async function setScheduling(dataScheduling) {
     try {
@@ -214,6 +215,39 @@ async function delScheduling(id = '') {
     }
 }
 
+async function generateCod() {
+    let code = 1;
+    async function callGenerateCod(transaction, id = 1) {
+        try {
+            const countSchedulings = await ModelSchedulings.count({
+                where: { cod: null }
+            }, { transaction });
+            if (countSchedulings > 0) {
+                const slScheduling = await ModelSchedulings.findOne({
+                    where: { cod: null, id }
+                }, { transaction })
+                if (slScheduling == null) {
+                    callGenerateCod(transaction, (id + 1))
+                } else {
+                    const upScheduling = await ModelSchedulings.update({ cod: code }, {
+                        where: { id: slScheduling.dataValues.id }
+                    })
+                    code++;
+                    callGenerateCod(transaction, (id + 1))
+                }
+            }
+        } catch (error) {
+            console.log('print de error em callGenerateCod => ', error)
+        }
+    }
+    try {
+        const trCode = await sequelize.transaction(t => {
+            callGenerateCod(t)
+        })
+    } catch (error) {
+        console.log('print de error em generateCod => ', error)
+    }
+}
 module.exports = {
     setScheduling,
     getSchedulings,
@@ -222,5 +256,6 @@ module.exports = {
     getSchedulingsbyDateRange,
     getSchedulingsByFilters,
     putScheduling,
-    delScheduling
+    delScheduling,
+    generateCod
 }

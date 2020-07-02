@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Schedulings = sequelize.define('Schedulings', {
+    cod: DataTypes.INTEGER,
     saleProbability: DataTypes.INTEGER,
     dateScheduling: DataTypes.DATEONLY,
     hourScheduling: DataTypes.TIME,
