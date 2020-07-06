@@ -102,8 +102,8 @@ async function getSaleByIdScheduling(idScheduling) {
     }
 }
 
-async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDate = '', finalDate = '', dateScheduling = 'false',
-    queryAdvanced = {}
+async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDate = '', finalDate = '',
+    dateScheduling = 'false', statusSale = 'vendido', queryAdvanced = {}
 }) {
     try {
         let result = [];
@@ -126,7 +126,7 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                         required: true,
                         attributes: ['id', 'createdAt', 'dateScheduling'],
                         where: {
-                            status: 'vendido'
+                            status: statusSale
                         }
                     },
                     {
@@ -189,6 +189,14 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
             }
             const includeTotSum = () => {
                 const resultIncludeTotSum = [];
+                resultIncludeTotSum.push({
+                    model: ModelSchedulings,
+                    as: 'scheduling',
+                    required: true,
+                    where: {
+                        status: statusSale
+                    }
+                })
                 if (dateScheduling == 'true') {
                     resultIncludeTotSum.push({
                         model: ModelSchedulings,
@@ -198,7 +206,6 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                             dateScheduling: {
                                 [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
                             },
-                            status: 'vendido'
                         }
                     })
                 }
@@ -234,9 +241,11 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
             let totRates = 0;
             trSales.sales.forEach(sale => {
                 sale.dataValues.formPaymentsId.forEach((infoForm, index2) => {
-                    const { value } = infoForm.dataValues
-                    const { rate } = infoForm.dataValues.formPayment[0]
+                    const { value } = infoForm.dataValues //valor armazenado de cada venda encontrada na consulta
+                    const { rate } = infoForm.dataValues.formPayment[0] //porcentagem de taxa da forma de pagamento utilizada na venda
+                    //uma vez que a taxa é configurada em porcentagem.na linha abaixo é feito o calculo do valor da taxa
                     sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate = (parseFloat(value) / 100 * parseFloat(rate)).toFixed(2);
+                    //totalização das taxas é armazenada na variavel totRates
                     totRates = totRates + parseFloat(sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate)
                 })
             })
@@ -244,6 +253,7 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
             result = trSales
             result.totRates = totRates
             result.totLiquid = (result.totSales - result.totRates)
+           
         } else {
             result = { message: allBad('Data de inicio e fim não informada!'), data: { initialDate, finalDate } }
         }

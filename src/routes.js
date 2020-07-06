@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
 
-const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePassword } = require('./controllers/user');
+const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePassword, getUsersByGroup } =
+    require('./controllers/user');
 
 const { getAllEntities } = require('./controllers/entities');
 
@@ -55,13 +56,17 @@ routes.get('/getAllUsers', async (req, res) => {
     res.send(resGetAllUsers)
 })
 routes.get('/forgotPassword', async (req, res) => {
-    const resGetForgotPassword = await forgotPassword(req.query)
+    const resGetForgotPassword = await forgotPassword(req.query) //essa rota vai trabalhar com envio de emails, ainda nao está pronta
     res.send(resGetForgotPassword)
 })
 routes.put('/changePassword/:id', async (req, res) => {
     const { newPassword, oldPassword } = req.body
     const resChangePassword = await changePassword(req.params.id, newPassword, oldPassword);
     res.send(resChangePassword)
+})
+routes.get('/getUsersByGroup/:id', async (req, res) => {
+    const resGetUsersByGroup = await getUsersByGroup(req.params.id)
+    res.send(resGetUsersByGroup)
 })
 //-------------------------------------------------------------------
 //rotas relacionadas a entidades

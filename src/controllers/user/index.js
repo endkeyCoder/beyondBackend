@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 const { notFound, serviceError, allOk, allBad } = require('../../messages');
 const apiEmail = require('../../config/axios');
 const crypto = require('crypto');
+const { allowedNodeEnvironmentFlags } = require('process');
 const sequelize = models.sequelize;
 
 async function setUser(dataUser) {
@@ -159,11 +160,36 @@ async function changePassword(idUser = '', newPassword = '', oldPassword) {
     }
 }
 
+async function getUsersByGroup(idGroup = '') {
+    try {
+        if (idGroup !== '') {
+            const slUsers = await ModelUsers.findAll({
+                where: {
+                    groupId: idGroup
+                },
+                include: {
+                    model: ModelGroups,
+                    as: 'userGroup',
+                    required: true,
+                    attributes: ['name', 'id']
+                }
+            })
+            return { message: allOk('Usuários encontrados com sucesso'), data: slUsers }
+        } else {
+            return { message: allBad('Grupo nao informado para seleção de usuários') }
+        }
+    } catch (error) {
+        console.log('print de error em getUserByGroup => ', error);
+        return { message: serviceError('Problema ao tentar consultar usuarios por grupo'), error }
+    }
+}
+
 module.exports = {
     setUser,
     login,
     getExternalUsers,
     getAllUsers,
     forgotPassword,
-    changePassword
+    changePassword,
+    getUsersByGroup
 }
