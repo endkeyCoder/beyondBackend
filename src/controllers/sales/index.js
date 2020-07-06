@@ -124,7 +124,10 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                         model: ModelSchedulings,
                         as: 'scheduling',
                         required: true,
-                        attributes: ['id', 'createdAt', 'dateScheduling']
+                        attributes: ['id', 'createdAt', 'dateScheduling'],
+                        where: {
+                            status: 'vendido'
+                        }
                     },
                     {
                         model: ModelUser,
@@ -194,7 +197,8 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                         where: {
                             dateScheduling: {
                                 [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
-                            }
+                            },
+                            status: 'vendido'
                         }
                     })
                 }
@@ -227,20 +231,24 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                 }, { transaction: t })
                 return { sales: slSales, totSales }
             })
-
+            let totRates = 0;
             trSales.sales.forEach(sale => {
                 sale.dataValues.formPaymentsId.forEach((infoForm, index2) => {
                     const { value } = infoForm.dataValues
                     const { rate } = infoForm.dataValues.formPayment[0]
-                    sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate = (parseFloat(value) / 100 * parseFloat(rate)).toFixed(2)
+                    sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate = (parseFloat(value) / 100 * parseFloat(rate)).toFixed(2);
+                    totRates = totRates + parseFloat(sale.dataValues.formPaymentsId[index2].dataValues.formPayment[0].dataValues.rate)
                 })
             })
+
             result = trSales
+            result.totRates = totRates
+            result.totLiquid = (result.totSales - result.totRates)
         } else {
             result = { message: allBad('Data de inicio e fim não informada!'), data: { initialDate, finalDate } }
         }
 
-        return { message: allOk('Em andamento'), data: result }
+        return { message: allOk('Relatório gerado com sucesso'), data: result }
     } catch (error) {
         console.log('print de error em getSalesByFilters => ', error)
         return { message: serviceError('Problema ao tentar selecionar relatorio de vendas') }
