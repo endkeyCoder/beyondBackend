@@ -3,7 +3,7 @@ const ModelUsers = models.Users;
 const ModelGroups = models.userGroups;
 const { providerToken } = require('../uteis');
 const { getPermissionsById } = require('../permissions');
-const { Op } = require('sequelize');
+const { Op, Model } = require('sequelize');
 const { notFound, serviceError, allOk, allBad } = require('../../messages');
 const apiEmail = require('../../config/axios');
 const crypto = require('crypto');
@@ -35,7 +35,7 @@ async function login(dataUser) {
         const { nick, password } = dataUser;
         const slUser = await ModelUsers.findOne({
             where: {
-                nick: nick, password: password
+                nick: nick, password: password, block: false
             },
             include: [
                 {
@@ -46,7 +46,7 @@ async function login(dataUser) {
             ]
         })
         if (slUser == null) {
-            return { message: allBad('Usuário/Senha inválidos'), data: dataUser }
+            return { message: allBad('Usuário/Senha inválidos e/ou usuário bloqueado'), data: dataUser }
         } else {
             const { name, email, id, nick, groupId } = slUser.dataValues
             slUser.dataValues.password = undefined;
@@ -184,6 +184,46 @@ async function getUsersByGroup(idGroup = '') {
     }
 }
 
+async function blockUser(id) {
+    try {
+        const trBlockUser = await sequelize.transaction(async (t) => {
+            const slUser = await ModelUsers.findOne({
+                where: {
+                    id
+                }
+            }, { transaction: t })
+            if (slUser !== null) {
+                const { block } = slUser.dataValues
+                const updateUser = await ModelUsers.update({ block: !block }, {
+                    where: {
+                        id
+                    }
+                }, { transaction: t })
+            } else {
+                return { message: allBad('usuário nao encontrado') }
+            }
+        })
+        return { message: allOk('usuário alterado com sucesso'), data: trBlockUser }
+    } catch (error) {
+        console.log('print de error em blockUser => ', error)
+        return { message: serviceError('Problema ao bloquear/desbloquear o usuário'), error }
+    }
+}
+
+async function putUser(id, data) {
+    try {
+        const updateUser = await ModelUsers.update(data, {
+            where: {
+                id
+            }
+        })
+        return { message: allOk('Usuário alterado com sucesso'), data: updateUser }
+    } catch (error) {
+        console.log('print de error em putUser => ', error)
+        return { message: serviceError('Problema ao tentar alterar as informações do usuário'), error }
+    }
+}
+
 module.exports = {
     setUser,
     login,
@@ -191,5 +231,7 @@ module.exports = {
     getAllUsers,
     forgotPassword,
     changePassword,
-    getUsersByGroup
+    getUsersByGroup,
+    blockUser,
+    putUser
 }

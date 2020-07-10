@@ -1,7 +1,9 @@
+const path = require('path');
 const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
 
-const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePassword, getUsersByGroup } =
+const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePassword, getUsersByGroup, blockUser,
+    putUser } =
     require('./controllers/user');
 
 const { getAllEntities } = require('./controllers/entities');
@@ -18,6 +20,8 @@ const { setPlanPayments, getAllPlanPayments } = require('./controllers/planPayme
 const { setSale, getSaleByIdScheduling, getSalesByFilters } = require('./controllers/sales');
 
 const { getAuditResume } = require('./controllers/audit');
+
+const { loadGsuite } = require('./config/gsuite')
 
 const routes = Router();
 //rotas relacionadas a grupos de usuarios----------------------------
@@ -67,6 +71,14 @@ routes.put('/changePassword/:id', async (req, res) => {
 routes.get('/getUsersByGroup/:id', async (req, res) => {
     const resGetUsersByGroup = await getUsersByGroup(req.params.id)
     res.send(resGetUsersByGroup)
+})
+routes.put('/blockUser/:id', async (req, res) => {
+    const resBlockUser = await blockUser(req.params.id)
+    res.send(resBlockUser)
+})
+routes.put('/putUser/:id', async (req, res) => {
+    const resPutUser = await putUser(req.params.id, req.body)
+    res.send(resPutUser)
 })
 //-------------------------------------------------------------------
 //rotas relacionadas a entidades
@@ -159,6 +171,12 @@ routes.get('/getSalesByFilters', async (req, res) => {
 routes.get('/getAuditResume', async (req, res) => {
     const resGetAuditResume = await getAuditResume(req.query)
     res.send(resGetAuditResume)
+})
+//-------------------------------------------------------------------
+//As rotas dessa sessão são para testes de APIs externas-------------
+routes.get('/gsuite', async (req, res) => {
+    await loadGsuite();
+    res.send({ caminho: path.join(__dirname, '..', 'credentials.js'), })
 })
 //-------------------------------------------------------------------
 module.exports = routes;
