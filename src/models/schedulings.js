@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     userId: DataTypes.INTEGER,
     externalUser: DataTypes.INTEGER,
+    excluded: DataTypes.BOOLEAN
   }, {});
   Schedulings.associate = function (models) {
     Schedulings.hasMany(models.Users, {

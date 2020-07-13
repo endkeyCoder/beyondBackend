@@ -73,7 +73,10 @@ async function getSaleByIdScheduling(idScheduling) {
                 {
                     model: ModelSchedulings,
                     as: 'scheduling',
-                    required: true
+                    required: true,
+                    where: {
+                        excluded: false
+                    }
                 }
             ]
         })
@@ -126,7 +129,8 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                         required: true,
                         attributes: ['id', 'createdAt', 'dateScheduling'],
                         where: {
-                            status: statusSale
+                            status: statusSale,
+                            excluded: false
                         }
                     },
                     {
@@ -194,7 +198,8 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                     as: 'scheduling',
                     required: true,
                     where: {
-                        status: statusSale
+                        status: statusSale,
+                        excluded: false
                     }
                 })
                 if (dateScheduling == 'true') {
@@ -206,6 +211,7 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
                             dateScheduling: {
                                 [Op.between]: [`${initialDate} 00:00:00`, `${finalDate} 23:59:59`]
                             },
+                            excluded: false
                         }
                     })
                 }
@@ -253,7 +259,7 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
             result = trSales
             result.totRates = totRates
             result.totLiquid = (result.totSales - result.totRates)
-           
+
         } else {
             result = { message: allBad('Data de inicio e fim não informada!'), data: { initialDate, finalDate } }
         }

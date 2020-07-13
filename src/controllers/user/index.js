@@ -35,7 +35,7 @@ async function login(dataUser) {
         const { nick, password } = dataUser;
         const slUser = await ModelUsers.findOne({
             where: {
-                nick: nick, password: password, block: false
+                nick: nick, password: password, block: false, excluded: false
             },
             include: [
                 {
@@ -65,6 +65,9 @@ async function getExternalUsers() {
     try {
         const slUsers = await ModelUsers.findAll({
             attributes: { exclude: ['password'] },
+            where: {
+                excluded: false
+            },
             include: [
                 {
                     model: ModelGroups,
@@ -83,7 +86,10 @@ async function getExternalUsers() {
 async function getAllUsers() {
     try {
         const slUsers = await ModelUsers.findAll({
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            where: {
+                excluded: false
+            }
         })
         return { message: allOk('Usuários selecionados com sucesso'), data: slUsers }
     } catch (error) {
@@ -165,7 +171,8 @@ async function getUsersByGroup(idGroup = '') {
         if (idGroup !== '') {
             const slUsers = await ModelUsers.findAll({
                 where: {
-                    groupId: idGroup
+                    groupId: idGroup,
+                    excluded: false
                 },
                 include: {
                     model: ModelGroups,
@@ -224,6 +231,34 @@ async function putUser(id, data) {
     }
 }
 
+async function delUser(id) {
+    try {
+        const delUser = await ModelUsers.update({ excluded: true, block: true }, {
+            where: {
+                id
+            }
+        })
+        return { message: allOk('Usuário excluido com sucessso'), data: delUser }
+    } catch (error) {
+        console.log('print de error em delUser => ', error)
+        return { message: serviceError('Problema ao tentar exlcuir o usuario') }
+    }
+}
+
+async function recoverUser(id) {
+    try {
+        const resRecUser = await ModelUsers.update({ excluded: false }, {
+            where: {
+                id
+            }
+        })
+        return { message: allOk('Usuário recuperado com sucesso'), data: resRecUser }
+    } catch (error) {
+        console.log('print de error em recoverUser', error)
+        return { message: serviceError('Problema ao recuperar usuário'), error }
+    }
+}
+
 module.exports = {
     setUser,
     login,
@@ -233,5 +268,7 @@ module.exports = {
     changePassword,
     getUsersByGroup,
     blockUser,
-    putUser
+    putUser,
+    delUser,
+    recoverUser
 }

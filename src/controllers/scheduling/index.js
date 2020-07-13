@@ -32,7 +32,11 @@ async function setScheduling(dataScheduling) {
 
 async function getSchedulings(options = {}) {
     try {
-        const slSchedulings = await ModelSchedulings.findAll();
+        const slSchedulings = await ModelSchedulings.findAll({
+            where: {
+                excluded: false
+            }
+        });
         if (slSchedulings !== null) {
             return { message: allOk('Agendamentos carregados com sucesso'), data: slSchedulings }
         } else {
@@ -63,7 +67,8 @@ async function getSchedulingsByUser(userId = null, externalUserId = null) {
                     }
                 ],
                 where: {
-                    userId: userId
+                    userId: userId,
+                    excluded: false
                 }
             })
             const attSchedulings = slSchedulings.map(scheduling => {
@@ -82,7 +87,7 @@ async function putSchedulingById(dataScheduling = null) {
     try {
         if (dataScheduling) {
             const putScheduling = await ModelSchedulings.update(dataScheduling, {
-                where: { id: dataScheduling.id }
+                where: { id: dataScheduling.id, excluded: false }
             })
             return { message: allOk('Agendamento atualizado com sucesso'), data: putScheduling }
         }
@@ -100,7 +105,8 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
                     dateScheduling: {
                         [Op.between]: [initialDate, finalDate]
                     },
-                    externalUser: idExternalUser
+                    externalUser: idExternalUser,
+                    excluded: false
                 },
             })
             if (slSchedulings.length <= 0) {
@@ -142,7 +148,8 @@ async function getSchedulingsByFilters({
                                     [Op.like]: `${client}%`
                                 }
                             }
-                        ]
+                        ],
+                        excluded: false
                     },
                     include: {
                         model: ModelUsers,
@@ -165,7 +172,8 @@ async function getSchedulingsByFilters({
                                     [Op.like]: `${client}%`
                                 }
                             }
-                        ]
+                        ],
+                        excluded: false
                     },
                     include: {
                         model: ModelUsers,
@@ -207,8 +215,10 @@ async function putScheduling(id = '', data = '') {
 async function delScheduling(id = '') {
     try {
         if (id !== '') {
-            const deleteScheduling = await ModelSchedulings.destroy({
-                where: { id }
+            const deleteScheduling = await ModelSchedulings.update({ excluded: true }, {
+                where: {
+                    id
+                }
             })
             return { message: allOk('O arquivo foi excluído com sucesso'), queryResult: deleteScheduling, data: { id } }
         }

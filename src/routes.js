@@ -3,7 +3,7 @@ const { Router } = require('express');
 const { setUserGroup, getUserGroupsById, getAllUserGroups, putUsergroup } = require('./controllers/groups');
 
 const { setUser, login, getExternalUsers, getAllUsers, forgotPassword, changePassword, getUsersByGroup, blockUser,
-    putUser } =
+    putUser, delUser, recoverUser } =
     require('./controllers/user');
 
 const { getAllEntities } = require('./controllers/entities');
@@ -79,6 +79,14 @@ routes.put('/blockUser/:id', async (req, res) => {
 routes.put('/putUser/:id', async (req, res) => {
     const resPutUser = await putUser(req.params.id, req.body)
     res.send(resPutUser)
+})
+routes.delete('/delUser/:id', async (req, res) => {
+    const resDelUser = await delUser(req.params.id);
+    res.send(resDelUser)
+})
+routes.put('/recoverUser/:id', async (req, res) => {
+    const resRecUser = await recoverUser(req.params.id)
+    res.send(resRecUser)
 })
 //-------------------------------------------------------------------
 //rotas relacionadas a entidades

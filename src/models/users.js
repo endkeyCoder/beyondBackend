@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     email: DataTypes.STRING,
     block: DataTypes.BOOLEAN,
-    groupId: DataTypes.INTEGER
+    groupId: DataTypes.INTEGER,
+    excluded: DataTypes.BOOLEAN
   }, {});
   Users.associate = function(models) {
     Users.hasMany(models.userGroups, {
