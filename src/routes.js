@@ -21,6 +21,10 @@ const { setSale, getSaleByIdScheduling, getSalesByFilters } = require('./control
 
 const { getAuditResume } = require('./controllers/audit');
 
+const { setProduct, getAllProducts } = require('./controllers/products');
+
+const { getComissionByUserId } = require('./controllers/commissions')
+
 const { loadGsuite } = require('./config/gsuite')
 
 const routes = Router();
@@ -179,6 +183,23 @@ routes.get('/getSalesByFilters', async (req, res) => {
 routes.get('/getAuditResume', async (req, res) => {
     const resGetAuditResume = await getAuditResume(req.query)
     res.send(resGetAuditResume)
+})
+//-------------------------------------------------------------------
+//Rotas relacionadas a produtos--------------------------------------
+routes.post('/setProduct', async (req, res) => {
+    console.log('print de req.body => ', req.body)
+    const resPostProduct = await setProduct(req.body);
+    res.send(resPostProduct)
+})
+routes.get('/getAllProducts', async (req, res) => {
+    const resGetAllPdoucts = await getAllProducts();
+    res.send(resGetAllPdoucts)
+})
+//-------------------------------------------------------------------
+//Rotas relacionadas a Comissões-------------------------------------
+routes.get('/getComissionByUserId', async (req, res) => {
+    const resGetComissionByUserId = await getComissionByUserId(req.query);
+    res.send(resGetComissionByUserId)
 })
 //-------------------------------------------------------------------
 //As rotas dessa sessão são para testes de APIs externas-------------

@@ -6,13 +6,16 @@ const ModelSchedulings = models.Schedulings;
 const ModelFormPaymentsSale = models.formPaymentsSale;
 const ModelUser = models.Users;
 const ModelGroups = models.userGroups;
+const ModelProductSales = models.productSales;
+const ModelProducts = models.products;
 const sequelize = models.sequelize;
 const { Op } = require('sequelize');
 const { allOk, serviceError, allBad } = require('../../messages');
 
 async function setSale(dataSale) {
-    const { sale = undefined, formPayments = undefined } = dataSale;
-    if (sale == undefined || formPayments == undefined) {
+    const { sale = undefined, formPayments = undefined, products = undefined } = dataSale;
+    console.log('print de products => ', products)
+    if (sale == undefined || formPayments == undefined || products == undefined) {
         return { message: allBad('Ausencia de informações para gravar a venda'), data: dataSale }
     } else {
         try {
@@ -39,7 +42,7 @@ async function setSale(dataSale) {
                 if (slFormPaymentsSale.length <= 0) {
                     const crFormPaymentsSale = formPayments.map(async formPayment => {
                         formPayment.idSale = idSale;
-                        return await ModelFormPaymentsSale.create(formPayment)
+                        return await ModelFormPaymentsSale.create(formPayment, { transaction: t })
                     }, { transaction: t })
                 } else {
                     const delFormPaymentsSale = await ModelFormPaymentsSale.destroy({
@@ -47,9 +50,25 @@ async function setSale(dataSale) {
                     }, { transaction: t })
                     const crFormPaymentsSale = formPayments.map(async formPayment => {
                         formPayment.idSale = idSale;
-                        return await ModelFormPaymentsSale.create(formPayment)
+                        return await ModelFormPaymentsSale.create(formPayment, { transaction: t })
                     }, { transaction: t })
                 }
+                const slProductSales = await ModelProductSales.findAll({
+                    where: {
+                        idSale
+                    }
+                }, { transaction: t })
+                if (slProductSales.length > 0) {
+                    await ModelProductSales.destroy({
+                        where: {
+                            idSale
+                        }
+                    }, { transaction: t })
+                }
+                const crProductSale = await Promise.all(products.map(async (product) => {
+                    product.idSale = idSale;
+                    return await ModelProductSales.create(product, { transaction: t })
+                }))
             });
             return { message: allOk('As informações da venda foram gravadas com sucesso'), data: recordSale }
         } catch (error) {
@@ -77,10 +96,11 @@ async function getSaleByIdScheduling(idScheduling) {
                     where: {
                         excluded: false
                     }
-                }
+                },
             ]
         })
         let slFormPaymentsSale = [];
+        let slProductsSale = [];
         if (slSale !== null) {
             slFormPaymentsSale = await ModelFormPaymentsSale.findAll({
                 where: { idSale: slSale.dataValues.id },
@@ -92,12 +112,21 @@ async function getSaleByIdScheduling(idScheduling) {
                     }
                 ]
             })
-
+            slProductsSale = await ModelProductSales.findAll({
+                where: {
+                    idSale: slSale.dataValues.id
+                },
+                include: {
+                    model: ModelProducts,
+                    as: 'product',
+                    required: true
+                }
+            })
         }
         if (slSale == null) {
             return { message: allBad('Nenhuma venda encontrada para esse agendamento'), data: slSale }
         } else {
-            return { message: allOk('Venda encontrada'), data: { sale: slSale, formPayments: slFormPaymentsSale } }
+            return { message: allOk('Venda encontrada'), data: { sale: slSale, formPayments: slFormPaymentsSale, products: slProductsSale } }
         }
     } catch (error) {
         console.log('print de error em getSaleByIdScheduling => ', error);
@@ -271,9 +300,68 @@ async function getSalesByFilters({ idExternalUser = '', idGroup = '', initialDat
     }
 }
 
+//funções que podem ser uteis
+
+function calcTotSales(arrSales = []) {
+    if (arrSales.length > 0) {
+        let tot = 0;
+        arrSales.forEach(sale => {
+            tot = tot + parseFloat(sale.dataValues.value)
+        })
+        return tot
+    } else {
+        return 0;
+    }
+}
+
+async function calcNetSale(idSale) {
+    try {
+        const slValuesSale = await ModelFormPaymentsSale.findAll({
+            where: {
+                idSale
+            },
+            include: [
+                {
+                    model: ModelFormPayments,
+                    as: 'formPayment',
+                    required: true,
+                    attributes: ['id', 'title', 'rate']
+                },
+                {
+                    model: ModelSales,
+                    as: 'sale',
+                    required: true,
+                    attributes: ['value']
+                }
+            ]
+        })
+        if (slValuesSale.length > 0) {
+            const valueSale = slValuesSale[0].sale[0].value
+            const grossValues = slValuesSale.map(valueSale => {
+                return { value: valueSale.value, idFormPayment: valueSale.idFormPayment }
+            })
+            const usedFormPayments = slValuesSale.map((vs) => vs.formPayment[0])
+            console.log('prints das variaveis do calculo => ', valueSale, grossValues, usedFormPayments)
+            const totValueRates = grossValues.reduce((sum, grossValue, index) => {
+                const configRate = usedFormPayments.find(frp => frp.id == grossValue.idFormPayment).rate
+                const valueRate = parseFloat(grossValue.value) / 100 * parseFloat(configRate)
+                console.log('print de valueRate => ', valueRate, index)
+                return parseFloat(sum) + parseFloat(valueRate)
+            }, 0)
+            console.log('print de totValuesRates => ', totValueRates)
+            return valueSale - totValueRates;
+        } else {
+            return 0;
+        }
+    } catch (error) {
+        console.log('print de error em calcNetSale => ', error)
+    }
+}
 
 module.exports = {
     setSale,
     getSaleByIdScheduling,
-    getSalesByFilters
+    getSalesByFilters,
+    calcTotSales,
+    calcNetSale
 }
