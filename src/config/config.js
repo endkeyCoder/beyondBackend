@@ -1,4 +1,4 @@
-require('dotenv').config();
+const dotenv = require('dotenv').config();
 module.exports = {
   "development": {
     "username": process.env.DATABASE_USER,
@@ -15,17 +15,18 @@ module.exports = {
     "password": process.env.DATABASE_TEST_PASSWORD,
     "database": process.env.DATABASE_TEST_NAME,
     "host": process.env.DATABASE_TEST_HOST,
+    "port": process.env.DATABASE_TEST_PORT,
     "dialect": process.env.DATABASE_TEST_DIALECT,
     "operatorsAliases": false,
     "timezone": "-03:00",
-    "use_env_variable": 'DATABASE_URL'
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql",
+    "username": process.env.DATABASE_PROD_USER,
+    "password": process.env.DATABASE_PROD_PASSWORD,
+    "database": process.env.DATABASE_PROD_NAME,
+    "host": process.env.DATABASE_PROD_HOST,
+    "port": process.env.DATABASE_PROD_PORT,
+    "dialect": process.env.DATABASE_PROD_DIALECT,
     "operatorsAliases": false,
     "use_env_variable": 'DATABASE_URL'
   }
