@@ -28,6 +28,5 @@ module.exports = {
     "port": process.env.DATABASE_PROD_PORT,
     "dialect": process.env.DATABASE_PROD_DIALECT,
     "operatorsAliases": false,
-    "use_env_variable": 'DATABASE_URL'
   }
 }
