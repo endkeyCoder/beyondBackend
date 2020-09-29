@@ -208,4 +208,9 @@ routes.get('/gsuite', async (req, res) => {
     res.send({ caminho: path.join(__dirname, '..', 'credentials.js'), })
 })
 //-------------------------------------------------------------------
+//Rotas para testes--------------------------------------------------
+routes.get('/', async (req, res) => [
+    res.send({ message: 'Server runnig!' })
+])
+//-------------------------------------------------------------------
 module.exports = routes;
