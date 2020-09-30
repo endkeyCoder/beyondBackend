@@ -7,6 +7,7 @@ const { Op, Model } = require('sequelize');
 const { sequelize } = require('../../models');
 
 async function setScheduling(dataScheduling) {
+
     try {
         if ('userId' in dataScheduling) {
             const lastCode = await ModelSchedulings.findOne({
@@ -14,8 +15,10 @@ async function setScheduling(dataScheduling) {
                     ['id', 'DESC']
                 ]
             })
-            dataScheduling.cod = parseInt(lastCode.dataValues.cod) + 1
+
+            dataScheduling.cod = lastCode ? parseInt(lastCode.dataValues.cod) + 1 : 1
             const resInsertSchedule = await ModelSchedulings.create(dataScheduling);
+            console.log('print de resInsertSchedule => ', resInsertSchedule)
             const slExternalUser = await ModelUsers.findOne({
                 where: { id: resInsertSchedule.dataValues.externalUser }
             })
