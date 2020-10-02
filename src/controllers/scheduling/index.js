@@ -104,6 +104,9 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
     try {
         if (initialDate !== null && finalDate !== null && idExternalUser !== null) {
             const slSchedulings = await ModelSchedulings.findAll({
+                order:[
+                    ['hourScheduling', 'ASC']
+                ],
                 where: {
                     dateScheduling: {
                         [Op.between]: [initialDate, finalDate]
