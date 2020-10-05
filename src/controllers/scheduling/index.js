@@ -114,6 +114,12 @@ async function getSchedulingsbyDateRange({ initialDate = null, finalDate = null,
                     externalUser: idExternalUser,
                     excluded: false
                 },
+                include: {
+                    model: ModelUsers,
+                    as: 'user',
+                    required: true,
+                    attributes: ['name']
+                }
             })
             if (slSchedulings.length <= 0) {
                 return { message: allOk('Nenhum agendamento encontrado'), data: slSchedulings }
